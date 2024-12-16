@@ -172,8 +172,12 @@ namespace EXandIM.Web.Controllers
             if (activity.User is null)
                 return NotFound();
 
+            var orderSort = new List<int>();
             foreach (var book in activity.Books)
+            {
+                orderSort.Add(book.SortOrder);
                 _context.ItemsInActivity.Remove(book);
+            }
 
 
             activity.Title = model.Title;
@@ -187,6 +191,19 @@ namespace EXandIM.Web.Controllers
             else
             {
                 activity.Books = model.Books;
+            }
+
+            var lastCount = orderSort.Count();
+            for (int i = 0; i < activity.Books.Count; i++)
+            {
+                if (i < orderSort.Count)
+                {
+                    activity.Books.ToList()[i].SortOrder = orderSort[i];
+                }
+                else
+                {
+                    activity.Books.ToList()[i].SortOrder = i;
+                }
             }
 
             //var teams = activity.Teams;
