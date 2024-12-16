@@ -113,6 +113,9 @@
                                             <div class="min-w-125px pe-2">
                                                 <span class="fs-6 badge badge-light-success">@((book.Book.IsExport) ? "صادر" : "وارد")</span>
                                             </div>
+                                            <div class="min-w-125px pe-2">
+                                                <div class="fs-6 badge badge-light-@(@book.Book.Passed ? "success" : "danger")">@(@book.Book.Passed ? "منجزه" : "فى الانتظار")</div>
+                                            </div>
                                             <!--begin::Action-->
                                             <a href="/ExportBook/Details/@book.Book.Id" class="btn btn-sm btn-light btn-active-light-primary">تفاصيل</a>
                                             <!--end::Action-->
@@ -149,7 +152,7 @@
                                                 <span class="badge badge-light-success fs-6">مطالعه</span>
                                             </div>
                                             <div class="min-w-125px pe-2">
-                                                <div class="fs-6 badge badge-light-@(@book.Reading.Passed ? "success" : "danger")">@(@book.Reading.Passed ? "اجتاز المراجعه" : "قيد المراجعة")</div>
+                                                <div class="fs-6 badge badge-light-@(@book.Reading.Passed ? "success" : "danger")">@(@book.Reading.Passed ? "منجزه" : "فى الانتظار")</div>
                                             </div>
                                             <!--begin::Action-->
                                             <a href="/Readings/Details/@book.Reading.Id" class="btn btn-sm btn-light btn-active-light-primary">تفاصيل</a>
