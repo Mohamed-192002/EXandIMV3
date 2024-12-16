@@ -11,5 +11,8 @@
         public DateTime? ProcedureDate { get; set; }
         public int? ActivityBookId { get; set; }
         public ActivityBook? ActivityBook { get; set; }
+
+        // New SortOrder field to define order within the ActivityBook
+        public int SortOrder { get; set; }
     }
 }

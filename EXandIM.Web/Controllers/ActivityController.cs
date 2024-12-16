@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using System.Text.RegularExpressions;
 
 namespace EXandIM.Web.Controllers
 {
@@ -53,7 +54,7 @@ namespace EXandIM.Web.Controllers
             var activity = _context.Activities
                 .Include(a => a.Books).ThenInclude(x => x.Book)
                 .Include(a => a.Books).ThenInclude(x => x.Reading)
-               //  .Include(b => b.Teams).ThenInclude(t => t.Circle)
+                 //  .Include(b => b.Teams).ThenInclude(t => t.Circle)
                  .Include(b => b.User)
                 .FirstOrDefault(a => a.Id == id);
             if (activity == null)
@@ -79,7 +80,7 @@ namespace EXandIM.Web.Controllers
             ViewBag.ExportBooks = GetExportBooks(user);
             ViewBag.ImportBooks = GetImportBooks(user);
             ViewBag.ReadingsBooks = GetReadingBooks(user);
-          //  ViewBag.Teams = GetTeams(user);
+            //  ViewBag.Teams = GetTeams(user);
             return View(activity);
         }
         [HttpPost]
@@ -111,7 +112,7 @@ namespace EXandIM.Web.Controllers
             //}
             _context.Activities.Add(activity);
             _context.SaveChanges();
-            
+
             return RedirectToAction(nameof(Index));
         }
         [Authorize(Roles = "CanEditActivity,SuperAdmin")]
@@ -125,7 +126,7 @@ namespace EXandIM.Web.Controllers
                 return BadRequest();
             var activity = _context.Activities
                .Include(a => a.Books)
-              // .Include(b => b.Teams)
+               // .Include(b => b.Teams)
                .FirstOrDefault(a => a.Id == id);
 
             if (activity is null)
@@ -138,12 +139,12 @@ namespace EXandIM.Web.Controllers
                 UserId = userId,
                 newBooks = [],
                 Books = activity.Books,
-            //    SelectedTeams = activity.Teams.Select(t => t.Id).ToList()
+                //    SelectedTeams = activity.Teams.Select(t => t.Id).ToList()
             };
             ViewBag.ExportBooks = GetExportBooks(user);
             ViewBag.ImportBooks = GetImportBooks(user);
             ViewBag.ReadingsBooks = GetReadingBooks(user);
-           // ViewBag.Teams = GetTeams(user);
+            // ViewBag.Teams = GetTeams(user);
 
             return View(viewModel);
         }
@@ -163,7 +164,7 @@ namespace EXandIM.Web.Controllers
 
             var activity = await _context.Activities.Include(a => a.Books).ThenInclude(x => x.Book)
                .Include(a => a.Books).ThenInclude(x => x.Reading)
-             //  .Include(b => b.Teams)
+               //  .Include(b => b.Teams)
                .Include(b => b.User).ThenInclude(u => u.Team).FirstOrDefaultAsync(a => a.Id == model.Id);
 
             if (activity is null)
@@ -270,6 +271,57 @@ namespace EXandIM.Web.Controllers
                 readings = _context.Readings.ToList();
             return readings;
         }
+
+        [HttpPost]
+        public async Task<IActionResult> SaveOrder(List<string> itemOrder, int activityBookId)
+        {
+            if (itemOrder == null || itemOrder.Count == 0)
+            {
+                return BadRequest(new { message = "No order data provided." });
+            }
+            List<string> numbers = [];
+            foreach (string item in itemOrder)
+            {
+                string cleanedItem = item.Replace("??", "").Trim();
+                numbers.Add(cleanedItem);
+            }
+
+            try
+            {
+                var activityBook = _context.Activities
+                                      .Include(ab => ab.Books)
+                                       .FirstOrDefault(ab => ab.Id == activityBookId);
+
+
+                if (activityBook == null)
+                {
+                    return NotFound("ActivityBook not found.");
+                }
+
+                for (int i = 0; i < numbers.Count; i++)
+                {
+                    int item;
+                    bool isInt = int.TryParse(numbers[i], out item);
+
+                    var itemInActivity = activityBook.Books.FirstOrDefault(ia => ia.Id == item);
+
+                    if (itemInActivity != null)
+                    {
+                        itemInActivity.SortOrder = i;
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+
+                return Ok(new { message = "Order saved successfully." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while saving the order.", details = ex.Message });
+            }
+        }
+
+
 
         //private List<Team> GetTeams(ApplicationUser user1)
         //{
