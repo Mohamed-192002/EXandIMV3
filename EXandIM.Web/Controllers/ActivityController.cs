@@ -138,8 +138,7 @@ namespace EXandIM.Web.Controllers
                 Title = activity.Title,
                 UserId = userId,
                 newBooks = [],
-                Books = activity.Books,
-                //    SelectedTeams = activity.Teams.Select(t => t.Id).ToList()
+                Books = activity.Books.OrderBy(x => x.SortOrder).ToList(),
             };
             ViewBag.ExportBooks = GetExportBooks(user);
             ViewBag.ImportBooks = GetImportBooks(user);
